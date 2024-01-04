@@ -1,0 +1,91 @@
+from contextlib import contextmanager
+
+
+class NoExceptions:
+
+    def __init__(self, exception_types):
+        """
+
+        :param exception_types: list of exception types (exception_types) that should be ignored.
+         This list is stored as an instance variable (self.exception_types).
+        """
+        self.exception_types = exception_types
+
+    def exception_should_ignore(self, type_exception):
+        """
+
+        :param type_exception: This is the type of the exception that was caught in the except block.
+        :return:
+        The "any" function checks if at least one item in the iterable is True.
+        The generator expression issubclass(type_exception, the_type) for the_type in self.exception_types iterates over
+        each exception type in self.exception_types and checks if exc_type is a subclass of that exception type.
+
+        So, in the context of exception handling, issubclass(type_exception, the_type) is checking whether the caught
+        exception (exc_type) is a subclass of any of the specified exception types (the_type).
+        If it is, the should_ignore_exception function returns True, indicating that the exception should be ignored.
+        If none of the specified exception types match, it returns False.
+        """
+
+        return any(issubclass(type_exception, the_type) for the_type in self.exception_types)
+
+    @contextmanager
+    def handel_exceptions(self):
+        """
+
+        :return:
+        """
+
+        try:
+            yield
+            """
+            The try block contains the setup code. When the yield statement is encountered, the code inside the with block
+            is executed. This is the point where the user's code inside the with block (e.g., 1 / 0) is run.
+            If an exception occurs during the execution of the user's code, the control is transferred to the except block.
+            """
+
+        except Exception as e:
+            """
+            The except block handles any exceptions that occurred within the with block. 
+            If the exception should not be ignored (based on the exception_should_ignore method), it is re-raised.
+             Otherwise, a message is printed indicating that the exception is being ignored.
+            """
+
+            if not self.exception_types(type(e)):
+                # If the exception should not be ignored (based on the exception_should_ignore method), it is re-raised
+                raise
+            else:
+                print(f"ignoring exception: {e}")
+
+    def __enter__(self):
+        """
+         The __enter__ method is called when entering the with block.
+        :return: It returns the result of calling the handle_exceptions method, effectively entering the context manager.
+        """
+        return self.handel_exceptions()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """
+        The __exit__ method is called when exiting the with block.
+
+        :param exc_type: This parameter represents the type of the exception that occurred.
+         It holds a reference to the class of the exception (e.g., ZeroDivisionError).
+         If no exception occurred, exc_type will be None.
+        :param exc_value: This parameter holds the instance of the exception that occurred.
+         It represents the actual instance of the exception class (e.g., an instance of ZeroDivisionError).
+         If no exception occurred, exc_value will be None.
+        :param traceback: This parameter is a traceback object that encapsulates the call stack at the point
+         where the exception occurred. It provides information about the sequence of function calls leading
+        up to the exception.
+        :return: It returns False to indicate that exceptions should not be suppressed.
+        """
+        return False
+
+
+# Example :
+"""
+In this example, the with statement creates an instance of NoExceptions with a list containing ZeroDivisionError. 
+Inside the with block, the code 1 / 0 raises a ZeroDivisionError, which is caught and ignored by the context manager.
+The message "ignoring exception: division by zero" is printed.
+"""
+with NoExceptions([ZeroDivisionError]):
+    result = 1 / 0

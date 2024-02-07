@@ -1,8 +1,7 @@
 from contextlib import contextmanager
 
 
-class NoExceptions:
-
+class ExceptionsToIgnore:
     def __init__(self, exception_types):
         """
         Initialize the NoExceptions context manager.
@@ -12,31 +11,25 @@ class NoExceptions:
         self.exception_types = exception_types
 
     @contextmanager
-    def handel_exceptions(self):
+    def handle_exceptions(self):
         """
         Context manager that catches and optionally ignores specified exceptions.
         """
         try:
-
             yield
-
         except Exception as e:
-
             if not any(isinstance(e, exception_type) for exception_type in self.exception_types):
-
                 raise e
-
             else:
-
-                print(f"Ignoring exception: {e}")
+                print(f"Ignoring exception {e}")
 
     def __enter__(self):
         """
         Called when entering the 'with' block.
 
-        :return: The 'handel_exceptions' context manager.
+        :return: The 'handle_exceptions' context manager.
         """
-        return self.handel_exceptions()
+        return self.handle_exceptions()
 
     def __exit__(self, exc_type, exc_value, traceback):
         """
@@ -50,7 +43,4 @@ class NoExceptions:
         return False
 
 
-# Test
-with NoExceptions([ZeroDivisionError]):
 
-    result = 1 / 0
